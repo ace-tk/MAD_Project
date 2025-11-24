@@ -1,0 +1,17 @@
+# Global ignores
+.DS_Store
+.env
+*.env
+npm-debug.log*
+yarn-error.log*
+
+# Expo/React Native artifacts
+my-app/.expo
+my-app/.expo-shared
+my-app/node_modules
+my-app/android
+my-app/ios
+
+# Server artifacts
+server/node_modules
+server/dist
