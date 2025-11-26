@@ -57,6 +57,11 @@ export const generateQuiz = async (
     return [];
   }
 
+  // If no API URL is configured, use offline fallback immediately
+  if (!API_BASE_URL) {
+    return getFallbackQuestions(topic, numQuestions);
+  }
+
   const performanceSummary = previousPerformance.length
     ? {
         attempts: previousPerformance.length,
@@ -85,6 +90,12 @@ export const saveQuizPerformance = async ({
   userId = DEFAULT_USER_ID,
 }) => {
   if (!responses?.length) return null;
+
+  // If no API URL is configured, skip saving (offline mode)
+  if (!API_BASE_URL) {
+    console.log('Offline mode: Quiz performance not saved to server');
+    return null;
+  }
 
   try {
     const payload = await request('/api/quizzes/results', {

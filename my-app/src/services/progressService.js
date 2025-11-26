@@ -1,11 +1,16 @@
 import { API_BASE_URL, DEFAULT_USER_ID } from '../config/constants';
 
 const request = async (path) => {
-  const response = await fetch(`${API_BASE_URL}${path}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch progress summary');
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch progress summary');
+    }
+    return response.json();
+  } catch (error) {
+    // Network errors (like localhost on mobile) should be caught
+    throw error;
   }
-  return response.json();
 };
 
 const FALLBACK_SUMMARY = {
@@ -26,6 +31,11 @@ const FALLBACK_SUMMARY = {
 };
 
 export const fetchProgressSummary = async (userId = DEFAULT_USER_ID) => {
+  // If no API URL is configured, return fallback data immediately (offline mode)
+  if (!API_BASE_URL) {
+    return FALLBACK_SUMMARY;
+  }
+  
   try {
     return await request(`/api/progress/summary?userId=${userId}`);
   } catch (error) {
@@ -33,3 +43,4 @@ export const fetchProgressSummary = async (userId = DEFAULT_USER_ID) => {
     return FALLBACK_SUMMARY;
   }
 };
+

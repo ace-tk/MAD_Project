@@ -39,8 +39,11 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    loadSummary();
-  }, [loadSummary]);
+    // Load summary on mount, but don't crash if it fails
+    loadSummary().catch(() => {
+      // Silently handle errors - fallback data will be used
+    });
+  }, []);
 
   useEffect(() => {
     if (isRunning) {
