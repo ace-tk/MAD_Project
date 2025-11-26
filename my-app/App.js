@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import HomeScreen from "./src/components/HomeScreen"; 
+import { NavigationContainer } from "@react-navigation/native"; 
+import AppNavigator from "./src/navigation/AppNavigator";
 
 const OnboardingScreen = ({ onStart }) => (
   <View style={styles.onboardingContainer}>
@@ -19,7 +20,9 @@ export default function App() {
   return showOnboarding ? (
     <OnboardingScreen onStart={() => setShowOnboarding(false)} />
   ) : (
-    <HomeScreen />
+    <NavigationContainer>
+      <AppNavigator />
+    </NavigationContainer>
   );
 }
 
