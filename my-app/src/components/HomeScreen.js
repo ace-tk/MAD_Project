@@ -76,66 +76,18 @@ export default function HomeScreen({ navigation }) {
 }
 
 const quickActions = [
-  {
-    label: "Study Plan",
-    icon: "document-text-outline",
-    bg: "#E0EAFF",
-    color: "#2563EB",
-    screen: "StudyPlan",
-  },
-  {
-    label: "Attendance",
-    icon: "checkmark-done-circle-outline",
-    bg: "#E3FFE0",
-    color: "#22C55E",
-    screen: "Attendance",
-  },
-  {
-    label: "Reminder",
-    icon: "alarm-outline",
-    bg: "#FFF4E0",
-    color: "#F59E0B",
-  },
-  {
-    label: "Expense",
-    icon: "wallet-outline",
-    bg: "#FFE4E6",
-    color: "#E11D48",
-    screen: "Expenses", // ✅ ADD THIS
-  },
-  {
-    label: "Focus",
-    icon: "timer-outline",
-    bg: "#F3E8FF",
-    color: "#7C3AED",
-    screen: "Pomodoro",
-  },
-  {
-    label: "Doubt Solver",
-    icon: "help-circle-outline",
-    bg: "#E0F7FF",
-    color: "#06B6D4",
-  },
-  {
-    label: "Gallery",
-    icon: "image-outline",
-    bg: "#ECFDF5",
-    color: "#10B981",
-  },
-  {
-    label: "Reports",
-    icon: "bar-chart-outline",
-    bg: "#F1F5F9",
-    color: "#475569",
-  },
-  {
-    label: "Quiz",
-    icon: "school-outline",
-    bg: "#FCE7F3",
-    color: "#DB2777",
-    screen: "SelectSubject",
-  },
+  { label: "Study Plan", icon: "document-text-outline", bg: "#E0EAFF", color: "#2563EB", screen: "StudyPlan" },
+  { label: "Attendance", icon: "checkmark-done-circle-outline", bg: "#E3FFE0", color: "#22C55E", screen: "Attendance" },
+  { label: "Reminder", icon: "alarm-outline", bg: "#FFF4E0", color: "#F59E0B" },
+  { label: "Expense", icon: "wallet-outline", bg: "#FFE4E6", color: "#E11D48", screen: "Expenses" },
+  { label: "Focus", icon: "timer-outline", bg: "#F3E8FF", color: "#7C3AED", screen: "Pomodoro" },
+  { label: "Doubt Solver", icon: "help-circle-outline", bg: "#E0F7FF", color: "#06B6D4" },
+  { label: "Gallery", icon: "image-outline", bg: "#ECFDF5", color: "#10B981" },
+  { label: "Reports", icon: "bar-chart-outline", bg: "#F1F5F9", color: "#475569", screen: "Reports"},
+  
+  { label: "Quiz", icon: "school-outline", bg: "#FCE7F3", color: "#DB2777", screen: "SelectSubject" },
 ];
+
 
   
 
