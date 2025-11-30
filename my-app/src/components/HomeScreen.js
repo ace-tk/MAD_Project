@@ -1,5 +1,5 @@
-// src/components/HomeScreen.js
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,14 +10,29 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen({ navigation }) {
+  const [currentDate, setCurrentDate] = useState("");
+
+  // Auto-update current date
+  useEffect(() => {
+    const now = new Date();
+    const options = { weekday: "long", month: "short", day: "numeric" };
+    const formatted = now.toLocaleDateString("en-US", options);
+    setCurrentDate(formatted);
+  }, []);
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      
       {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.name}>Tisha Kharade</Text>
 
         <View style={styles.headerIcons}>
-          <Ionicons name="notifications-outline" size={26} color="#333" />
+          {/* Bell Icon - Navigates to Notification Screen */}
+          <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+            <Ionicons name="notifications-outline" size={26} color="#333" />
+          </TouchableOpacity>
+
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>TK</Text>
           </View>
@@ -35,13 +50,16 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.progressRow}>
           <View>
             <Text style={styles.achievement}>Today's Achievement</Text>
+
             <TouchableOpacity>
               <View style={styles.timeBox}>
                 <Ionicons name="time-outline" size={18} color="white" />
                 <Text style={styles.timeText}>8h 49m 34s</Text>
               </View>
             </TouchableOpacity>
-            <Text style={styles.dateText}>Thursday, Nov 27</Text>
+
+            {/* ✔ Dynamic date */}
+            <Text style={styles.dateText}>{currentDate}</Text>
           </View>
 
           <View style={styles.circleProgress}>
@@ -76,21 +94,64 @@ export default function HomeScreen({ navigation }) {
 }
 
 const quickActions = [
-  { label: "Study Plan", icon: "document-text-outline", bg: "#E0EAFF", color: "#2563EB", screen: "StudyPlan" },
-  { label: "Attendance", icon: "checkmark-done-circle-outline", bg: "#E3FFE0", color: "#22C55E", screen: "Attendance" },
+  {
+    label: "Study Plan",
+    icon: "document-text-outline",
+    bg: "#E0EAFF",
+    color: "#2563EB",
+    screen: "StudyPlan",
+  },
+  {
+    label: "Attendance",
+    icon: "checkmark-done-circle-outline",
+    bg: "#E3FFE0",
+    color: "#22C55E",
+    screen: "Attendance",
+  },
   { label: "Reminder", icon: "alarm-outline", bg: "#FFF4E0", color: "#F59E0B" },
-  { label: "Expense", icon: "wallet-outline", bg: "#FFE4E6", color: "#E11D48", screen: "Expenses" },
-  { label: "Focus", icon: "timer-outline", bg: "#F3E8FF", color: "#7C3AED", screen: "Pomodoro" },
-  { label: "Doubt Solver", icon: "help-circle-outline", bg: "#E0F7FF", color: "#06B6D4" },
-  { label: "Gallery", icon: "image-outline", bg: "#ECFDF5", color: "#10B981" },
-  { label: "Reports", icon: "bar-chart-outline", bg: "#F1F5F9", color: "#475569", screen: "Reports"},
+  {
+    label: "Expense",
+    icon: "wallet-outline",
+    bg: "#FFE4E6",
+    color: "#E11D48",
+    screen: "Expenses",
+  },
+  {
+    label: "Focus",
+    icon: "timer-outline",
+    bg: "#F3E8FF",
+    color: "#7C3AED",
+    screen: "Pomodoro",
+  },
+  {
+    label: "Doubt Solver",
+    icon: "help-circle-outline",
+    bg: "#E0F7FF",
+    color: "#06B6D4",
+  },
+  {
+    label: "Gallery",
+    icon: "image-outline",
+    bg: "#ECFDF5",
+    color: "#10B981",
+  },
+  {
+    label: "Reports",
+    icon: "bar-chart-outline",
+    bg: "#F1F5F9",
+    color: "#475569",
+    screen: "Reports",
+  },
+  {
+    label: "Quiz",
+    icon: "school-outline",
+    bg: "#FCE7F3",
+    color: "#DB2777",
+    screen: "SelectSubject",
+  },
   
-  { label: "Quiz", icon: "school-outline", bg: "#FCE7F3", color: "#DB2777", screen: "SelectSubject" },
+
 ];
-
-
-  
-
 
 const styles = StyleSheet.create({
   container: {
@@ -255,3 +316,4 @@ const styles = StyleSheet.create({
     color: "#374151",
   },
 });
+

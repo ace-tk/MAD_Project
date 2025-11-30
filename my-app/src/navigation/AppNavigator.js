@@ -10,6 +10,11 @@ import DailyAttendanceScreen from "../components/DailyAttendanceScreen";
 import ExpensesScreen from "../components/ExpensesScreen";
 import StudyPlanScreen from "../components/StudyPlanScreen";
 import ReportsScreen from "../components/ReportsScreen";
+import NotificationScreen from "../components/NotificationScreen";
+import ReminderScreen from "../components/ReminderScreen";
+import DoubtSolverScreen from "../components/DoubtSolverScreen";
+
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -26,6 +31,13 @@ export default function AppNavigator() {
       <Stack.Screen name="Expenses" component={ExpensesScreen} />
       <Stack.Screen name="StudyPlan" component={StudyPlanScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
+      <Stack.Screen name="Notifications" component={NotificationScreen} />
+      <Stack.Screen name="Reminder" component={ReminderScreen} />
+      <Stack.Screen name="DoubtSolver" component={DoubtSolverScreen} />
+      
+
+
+
 
 
     </Stack.Navigator>
