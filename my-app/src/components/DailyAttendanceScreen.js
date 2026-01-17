@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function DailyAttendanceScreen({ navigation }) {
   const today = new Date().toLocaleDateString("en-US", {
@@ -10,12 +11,27 @@ export default function DailyAttendanceScreen({ navigation }) {
 
   const [studied, setStudied] = useState(0); // in minutes
   const goal = 8 * 60; // 8 hours in minutes
-  const progress = Math.round((studied / goal) * 100);
+  const progress = Math.min(100, Math.round((studied / goal) * 100));
 
   const handleCheckIn = () => {
-    // TEMP LOGIC — you can replace later
-    setStudied(studied + 60); // adds 1 hour
+    // Only allow adding time if goal is not reached
+    if (studied < goal) {
+      const newStudied = Math.min(goal, studied + 60); // adds 1 hour but caps at goal
+      setStudied(newStudied);
+      // Save to AsyncStorage
+      AsyncStorage.setItem('@attendance_studied', newStudied.toString());
+    }
   };
+
+  // Load saved attendance on mount
+  useEffect(() => {
+    AsyncStorage.getItem('@attendance_studied').then((value) => {
+      if (value) {
+        const saved = parseInt(value, 10);
+        setStudied(Math.min(goal, saved)); // Ensure it doesn't exceed goal
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -65,8 +81,14 @@ export default function DailyAttendanceScreen({ navigation }) {
         </View>
 
         {/* CHECK IN BUTTON */}
-        <TouchableOpacity style={styles.checkInBtn} onPress={handleCheckIn}>
-          <Text style={styles.checkInText}>⏩  Check In</Text>
+        <TouchableOpacity
+          style={[styles.checkInBtn, progress >= 100 && styles.checkInBtnDisabled]}
+          onPress={handleCheckIn}
+          disabled={progress >= 100}
+        >
+          <Text style={styles.checkInText}>
+            {progress >= 100 ? "✓ Goal Achieved!" : "⏩  Check In"}
+          </Text>
         </TouchableOpacity>
       </View>
 

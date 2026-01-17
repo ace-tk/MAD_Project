@@ -2,6 +2,8 @@
 
 Backend service for the AI Study Buddy Expo application. Provides AI-generated quizzes, performance tracking, and study analytics powered by MongoDB and OpenAI.
 
+https://drive.google.com/file/d/1s1Du4IYy_Ox-_jKZifWrUHlD8hRUVNyT/view?usp=drivesdk
+
 ## Getting Started
 
 ```bash

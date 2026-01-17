@@ -6,26 +6,89 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { fetchProgressSummary } from "../services/progressService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const USER_NAME_KEY = "@user_name";
 
 export default function HomeScreen({ navigation }) {
   const [currentDate, setCurrentDate] = useState("");
+  const [userName, setUserName] = useState("Tisha Kharade");
+  const [progressData, setProgressData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Auto-update current date
+  // Load user name and progress data
   useEffect(() => {
+    loadUserData();
+    loadProgress();
+    
+    // Update date every minute
+    updateDate();
+    const interval = setInterval(updateDate, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Refresh progress when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadProgress();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const updateDate = () => {
     const now = new Date();
     const options = { weekday: "long", month: "short", day: "numeric" };
     const formatted = now.toLocaleDateString("en-US", options);
     setCurrentDate(formatted);
-  }, []);
+  };
+
+  const loadUserData = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(USER_NAME_KEY);
+      if (stored) {
+        setUserName(stored);
+      }
+    } catch (error) {
+      console.error("Error loading user name:", error);
+    }
+  };
+
+  const loadProgress = async () => {
+    try {
+      const data = await fetchProgressSummary();
+      setProgressData(data);
+    } catch (error) {
+      console.error("Error loading progress:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatTime = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.floor(totalMinutes % 60);
+    const seconds = 34; // Static seconds to match original design
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    }
+    return `${minutes}m ${seconds}s`;
+  };
+
+  // Calculate today's study time and progress
+  const todayMinutes = progressData?.todaysMinutes || 0;
+  const displayTime = formatTime(todayMinutes);
+  const progressPercentage = Math.min(100, Math.round((todayMinutes / (8 * 60)) * 100));
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       
       {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.name}>Tisha Kharade</Text>
+        <Text style={styles.name}>{userName}</Text>
 
         <View style={styles.headerIcons}>
           {/* Bell Icon - Navigates to Notification Screen */}
@@ -34,41 +97,62 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>TK</Text>
+            <Text style={styles.avatarText}>
+              {userName
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* DAILY PROGRESS CARD */}
-      <View style={styles.progressCard}>
-        <Text style={styles.progressTitle}>✨ Daily Progress</Text>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate("ProgressDetails")}
+      >
+        <View style={styles.progressCard}>
+          <Text style={styles.progressTitle}>✨ Daily Progress</Text>
 
-        <Text style={styles.quote}>
-          🧠 Wisdom comes from reflecting on experience.
-        </Text>
+          <Text style={styles.quote}>
+            🧠 Wisdom comes from reflecting on experience.
+          </Text>
 
-        <View style={styles.progressRow}>
-          <View>
-            <Text style={styles.achievement}>Today's Achievement</Text>
+          <View style={styles.progressRow}>
+            <View>
+              <Text style={styles.achievement}>Today's Achievement</Text>
 
-            <TouchableOpacity>
               <View style={styles.timeBox}>
                 <Ionicons name="time-outline" size={18} color="white" />
-                <Text style={styles.timeText}>8h 49m 34s</Text>
+                <Text style={styles.timeText}>
+                  {loading ? "Loading..." : displayTime}
+                </Text>
               </View>
-            </TouchableOpacity>
 
-            {/* ✔ Dynamic date */}
-            <Text style={styles.dateText}>{currentDate}</Text>
+              {/* ✔ Dynamic date */}
+              <Text style={styles.dateText}>{currentDate}</Text>
+            </View>
+
+            <View style={styles.circleProgressContainer}>
+              <View style={styles.circleProgress}>
+                <Text style={styles.circleText}>
+                  {loading ? "..." : `${progressPercentage}%`}
+                </Text>
+              </View>
+            </View>
           </View>
 
-          <View style={styles.circleProgress}>
-            <Text style={styles.circleText}>0%</Text>
-          </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ProgressDetails")}
+            style={styles.tapContainer}
+          >
+            <Text style={styles.tap}>🔎 Tap for details</Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.tap}>🔎 Tap for details</Text>
-      </View>
+      </TouchableOpacity>
 
       {/* QUICK ACTIONS */}
       <Text style={styles.quickTitle}>Quick Actions</Text>
@@ -108,7 +192,13 @@ const quickActions = [
     color: "#22C55E",
     screen: "Attendance",
   },
-  { label: "Reminder", icon: "alarm-outline", bg: "#FFF4E0", color: "#F59E0B" },
+  {
+    label: "Reminder",
+    icon: "alarm-outline",
+    bg: "#FFF4E0",
+    color: "#F59E0B",
+    screen: "Reminder",
+  },
   {
     label: "Expense",
     icon: "wallet-outline",
@@ -128,12 +218,14 @@ const quickActions = [
     icon: "help-circle-outline",
     bg: "#E0F7FF",
     color: "#06B6D4",
+    screen: "DoubtSolver",
   },
   {
     label: "Gallery",
     icon: "image-outline",
     bg: "#ECFDF5",
     color: "#10B981",
+    screen: "Gallery",
   },
   {
     label: "Reports",
@@ -253,6 +345,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  circleProgressContainer: {
+    width: 65,
+    height: 65,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   circleProgress: {
     width: 65,
     height: 65,
@@ -269,8 +367,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  tap: {
+  tapContainer: {
     marginTop: 10,
+  },
+  tap: {
     color: "#EAF3FF",
     fontSize: 14,
   },

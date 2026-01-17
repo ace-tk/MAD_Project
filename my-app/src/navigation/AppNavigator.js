@@ -13,6 +13,8 @@ import ReportsScreen from "../components/ReportsScreen";
 import NotificationScreen from "../components/NotificationScreen";
 import ReminderScreen from "../components/ReminderScreen";
 import DoubtSolverScreen from "../components/DoubtSolverScreen";
+import Gallery from "../components/Gallery";
+import ProgressDetailsScreen from "../components/ProgressDetailsScreen";
 
 
 const Stack = createNativeStackNavigator();
@@ -33,8 +35,10 @@ export default function AppNavigator() {
       <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen name="Notifications" component={NotificationScreen} />
       <Stack.Screen name="Reminder" component={ReminderScreen} />
+
       <Stack.Screen name="DoubtSolver" component={DoubtSolverScreen} />
-      
+      <Stack.Screen name="Gallery" component={Gallery} />
+      <Stack.Screen name="ProgressDetails" component={ProgressDetailsScreen} />      
 
 
 
