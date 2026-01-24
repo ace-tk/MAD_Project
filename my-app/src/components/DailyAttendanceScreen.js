@@ -43,7 +43,7 @@ export default function DailyAttendanceScreen({ navigation }) {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Daily Attendance</Text>
-        
+
         <TouchableOpacity>
           <Text style={styles.refreshIcon}>⟳</Text>
         </TouchableOpacity>
@@ -87,23 +87,11 @@ export default function DailyAttendanceScreen({ navigation }) {
           disabled={progress >= 100}
         >
           <Text style={styles.checkInText}>
-            {progress >= 100 ? "✓ Goal Achieved!" : "⏩  Check In"}
+            {progress >= 100 ? "✓ Goal Achieved!" : "⏩  Mark Attendance"}
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* WEEKLY PROGRESS CARD */}
-      <View style={styles.weeklyCard}>
-        <View style={styles.weekHead}>
-          <Text style={styles.weekTitle}>Weekly Progress</Text>
-          <Text style={styles.weekBadge}>Last 7 Days</Text>
-        </View>
-
-        <View style={styles.emptyState}>
-          <Text style={styles.calendarIcon}>📅</Text>
-          <Text style={styles.emptyText}>No attendance data available</Text>
-        </View>
-      </View>
 
     </View>
   );
@@ -223,53 +211,6 @@ const styles = StyleSheet.create({
   checkInText: {
     color: "white",
     fontSize: 18,
-    fontWeight: "700",
-  },
-
-  /******** WEEKLY CARD *********/
-  weeklyCard: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-
-  weekHead: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-
-  weekTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#374151",
-  },
-
-  weekBadge: {
-    backgroundColor: "#E4EDFF",
-    color: "#0057D9",
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-
-  calendarIcon: {
-    fontSize: 40,
-    marginBottom: 10,
-  },
-
-  emptyText: {
-    color: "#6B7280",
-    fontSize: 16,
   },
 });
+
