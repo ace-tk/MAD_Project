@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -6,13 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
+  Dimensions
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchProgressSummary } from "../services/progressService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USER_NAME_KEY = "@user_name";
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen({ navigation }) {
   const [currentDate, setCurrentDate] = useState("");
@@ -24,7 +24,7 @@ export default function HomeScreen({ navigation }) {
   useEffect(() => {
     loadUserData();
     loadProgress();
-    
+
     // Update date every minute
     updateDate();
     const interval = setInterval(updateDate, 60000);
@@ -85,15 +85,21 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      
+
       {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.name}>{userName}</Text>
+        <View>
+          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.name}>{userName}</Text>
+        </View>
 
         <View style={styles.headerIcons}>
           {/* Bell Icon - Navigates to Notification Screen */}
-          <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-            <Ionicons name="notifications-outline" size={26} color="#333" />
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate("Notifications")}
+          >
+            <Ionicons name="notifications-outline" size={24} color="#2D3436" />
           </TouchableOpacity>
 
           <View style={styles.avatar}>
@@ -109,31 +115,31 @@ export default function HomeScreen({ navigation }) {
         </View>
       </View>
 
-      {/* DAILY PROGRESS CARD */}
+      {/* DAILY PROGRESS CARD (Handmade Style) */}
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => navigation.navigate("ProgressDetails")}
       >
         <View style={styles.progressCard}>
-          <Text style={styles.progressTitle}>✨ Daily Progress</Text>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.progressTitle}>✨ Daily Progress</Text>
+            <Text style={styles.dateText}>{currentDate}</Text>
+          </View>
 
           <Text style={styles.quote}>
-            🧠 Wisdom comes from reflecting on experience.
+            "Wisdom comes from reflecting on experience."
           </Text>
 
           <View style={styles.progressRow}>
             <View>
-              <Text style={styles.achievement}>Today's Achievement</Text>
+              <Text style={styles.achievement}>Today's Focus</Text>
 
               <View style={styles.timeBox}>
-                <Ionicons name="time-outline" size={18} color="white" />
+                <Ionicons name="time-outline" size={20} color="#1D7CF2" />
                 <Text style={styles.timeText}>
                   {loading ? "Loading..." : displayTime}
                 </Text>
               </View>
-
-              {/* ✔ Dynamic date */}
-              <Text style={styles.dateText}>{currentDate}</Text>
             </View>
 
             <View style={styles.circleProgressContainer}>
@@ -149,13 +155,13 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate("ProgressDetails")}
             style={styles.tapContainer}
           >
-            <Text style={styles.tap}>🔎 Tap for details</Text>
+            <Text style={styles.tap}>Tap for details ➔</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
 
       {/* QUICK ACTIONS */}
-      <Text style={styles.quickTitle}>Quick Actions</Text>
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
 
       <View style={styles.grid}>
         {quickActions.map((item, index) => (
@@ -167,12 +173,15 @@ export default function HomeScreen({ navigation }) {
             }
           >
             <View style={[styles.iconBox, { backgroundColor: item.bg }]}>
-              <Ionicons name={item.icon} size={26} color={item.color} />
+              <Ionicons name={item.icon} size={28} color={item.color} />
             </View>
             <Text style={styles.actionText}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Bottom spacer for scrolling */}
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
@@ -241,29 +250,34 @@ const quickActions = [
     color: "#DB2777",
     screen: "SelectSubject",
   },
-  
-
 ];
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F7FB",
-    paddingHorizontal: 15,
-    paddingTop: 40,
+    backgroundColor: "#FDFBF7", // Soft paper background
+    paddingHorizontal: 20, // Slightly more padding
+    paddingTop: 50,
   },
 
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 25,
+  },
+
+  greeting: {
+    fontSize: 14,
+    color: "#636E72",
+    marginBottom: 2,
+    fontWeight: "600",
   },
 
   name: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#222",
+    fontSize: 28,
+    fontWeight: "800", // Thicker font
+    color: "#2D3436",
   },
 
   headerIcons: {
@@ -272,13 +286,25 @@ const styles = StyleSheet.create({
     gap: 15,
   },
 
+  iconButton: {
+    padding: 8,
+    backgroundColor: "white",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+  },
+
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 22,
-    backgroundColor: "#6366F1",
+    width: 44,
+    height: 44,
+    borderRadius: 16, // Softer square
+    backgroundColor: "#6C5CE7", // Matching theme accent
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#6C5CE7",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
 
   avatarText: {
@@ -287,27 +313,49 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  // HANDMADE PROGRESS CARD
   progressCard: {
-    backgroundColor: "#1D7CF2",
-    padding: 20,
-    borderRadius: 20,
-    marginBottom: 20,
-    shadowColor: "#1D7CF2",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 24,
+    marginBottom: 30,
+    shadowColor: "#0984E3",
+    shadowOpacity: 0.08,
+    shadowRadius: 15,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.02)",
+  },
+
+  cardHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
 
   progressTitle: {
-    color: "white",
+    color: "#2D3436",
     fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 5,
+    fontWeight: "800",
+  },
+
+  dateText: {
+    color: "#B2BEC3",
+    fontSize: 13,
+    fontWeight: "600",
+    backgroundColor: "#F4F6F8",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
 
   quote: {
-    color: "#E8F0FF",
-    marginBottom: 10,
+    color: "#636E72",
+    marginBottom: 20,
     fontSize: 14,
+    fontStyle: "italic",
+    lineHeight: 20,
   },
 
   progressRow: {
@@ -317,69 +365,73 @@ const styles = StyleSheet.create({
   },
 
   achievement: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
+    color: "#B2BEC3",
+    fontWeight: "600",
+    fontSize: 14,
     marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 
   timeBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
+    backgroundColor: "#EAF6FF", // Light blue tint
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 16,
     marginBottom: 5,
+    alignSelf: 'flex-start'
   },
 
   timeText: {
-    color: "white",
-    marginLeft: 6,
-    fontWeight: "600",
-  },
-
-  dateText: {
-    color: "#D9E8FF",
-    fontSize: 14,
-    marginTop: 4,
+    color: "#0984E3", // Stronger blue
+    marginLeft: 8,
+    fontWeight: "700",
+    fontSize: 18,
   },
 
   circleProgressContainer: {
-    width: 65,
-    height: 65,
+    width: 75,
+    height: 75,
     justifyContent: "center",
     alignItems: "center",
   },
   circleProgress: {
-    width: 65,
-    height: 65,
+    width: 75,
+    height: 75,
     borderRadius: 40,
-    borderWidth: 5,
-    borderColor: "rgba(255,255,255,0.6)",
+    borderWidth: 6,
+    borderColor: "#EAF6FF", // Background ring
     justifyContent: "center",
     alignItems: "center",
+    borderTopColor: "#0984E3", // Active ring simulation (simple)
+    borderRightColor: "#0984E3",
+    transform: [{ rotate: "-45deg" }] // Just for visual style
   },
 
   circleText: {
-    color: "white",
+    color: "#0984E3",
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
+    transform: [{ rotate: "45deg" }] // Counteract rotation
   },
 
   tapContainer: {
-    marginTop: 10,
+    marginTop: 15,
+    alignItems: "flex-end",
   },
   tap: {
-    color: "#EAF3FF",
-    fontSize: 14,
+    color: "#B2BEC3",
+    fontSize: 13,
+    fontWeight: "600",
   },
 
-  quickTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 15,
-    color: "#1E293B",
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 20,
+    color: "#2D3436",
   },
 
   grid: {
@@ -391,29 +443,30 @@ const styles = StyleSheet.create({
   actionCard: {
     width: "31%",
     backgroundColor: "white",
-    paddingVertical: 20,
-    borderRadius: 16,
+    paddingVertical: 18,
+    borderRadius: 20, // More rounded
     alignItems: "center",
     marginBottom: 15,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.01)",
   },
 
   iconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 18, // Squircle
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   actionText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#374151",
+    color: "#636E72",
   },
 });
-
