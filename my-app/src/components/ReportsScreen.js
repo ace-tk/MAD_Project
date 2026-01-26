@@ -6,6 +6,9 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Modal,
+  FlatList,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -15,6 +18,49 @@ export default function ReportsScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState("Insights"); // Insights | Overview
   const [selectedMonth, setSelectedMonth] = useState("Nov");
   const [selectedYear, setSelectedYear] = useState("2026");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pickerType, setPickerType] = useState("month"); // 'month' | 'year'
+
+  // Data for pickers
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  // Generate some years (e.g., current year - 2 to current year + 2)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => String(currentYear - 2 + i));
+
+  const openPicker = (type) => {
+    setPickerType(type);
+    setModalVisible(true);
+  };
+
+  const handleSelect = (item) => {
+    if (pickerType === "month") {
+      setSelectedMonth(item);
+    } else {
+      setSelectedYear(item);
+    }
+    setModalVisible(false);
+  };
+
+  const renderPickerItem = ({ item }) => {
+    const isSelected =
+      (pickerType === "month" && item === selectedMonth) ||
+      (pickerType === "year" && item === selectedYear);
+
+    return (
+      <TouchableOpacity
+        style={styles.pickerItem}
+        onPress={() => handleSelect(item)}
+      >
+        <Text style={[styles.pickerText, isSelected && styles.pickerTextSelected]}>
+          {item}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -34,13 +80,45 @@ export default function ReportsScreen({ navigation }) {
 
       {/* --- MONTH/YEAR FILTER (Handmade Look) --- */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity style={styles.filterChip}>
+        <TouchableOpacity
+          style={styles.filterChip}
+          onPress={() => openPicker("month")}
+        >
           <Text style={styles.filterText}>{selectedMonth} ▾</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterChip}>
+        <TouchableOpacity
+          style={styles.filterChip}
+          onPress={() => openPicker("year")}
+        >
           <Text style={styles.filterText}>{selectedYear} ▾</Text>
         </TouchableOpacity>
       </View>
+
+      {/* --- PICKER MODAL --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Select {pickerType === "month" ? "Month" : "Year"}
+                </Text>
+                <FlatList
+                  data={pickerType === "month" ? months : years}
+                  keyExtractor={(item) => item}
+                  renderItem={renderPickerItem}
+                  showsVerticalScrollIndicator={false}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       {/* --- TAB SWITCHER --- */}
       <View style={styles.tabContainer}>
@@ -494,5 +572,46 @@ const styles = StyleSheet.create({
     color: "#636E72",
     fontSize: 15,
     lineHeight: 22,
-  }
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    maxHeight: "60%", // Limit height
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#2D3436",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  pickerItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F4F6F8",
+    alignItems: "center",
+  },
+  pickerText: {
+    fontSize: 16,
+    color: "#636E72",
+    fontWeight: "500",
+  },
+  pickerTextSelected: {
+    color: "#0984E3",
+    fontWeight: "700",
+  },
 });
