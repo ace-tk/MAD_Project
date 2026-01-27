@@ -1,6 +1,6 @@
 // src/components/PomodoroScreen.js
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 
 export default function PomodoroScreen({ navigation }) {
   const WORK_TIME = 25 * 60;
@@ -51,6 +51,7 @@ export default function PomodoroScreen({ navigation }) {
 
   const handleTimerEnd = () => {
     if (mode === "work") {
+      Alert.alert("Focus Session Complete", "Great job! You've completed a session.");
       const newSessions = sessions + 1;
       setSessions(newSessions);
 
@@ -91,8 +92,8 @@ export default function PomodoroScreen({ navigation }) {
         {mode === "work"
           ? "Focus Session"
           : mode === "short"
-          ? "Short Break"
-          : "Long Break"}
+            ? "Short Break"
+            : "Long Break"}
       </Text>
 
       {/* Time */}
