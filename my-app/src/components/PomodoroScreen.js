@@ -1,6 +1,14 @@
-// src/components/PomodoroScreen.js
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Circle } from "react-native-svg";
+import { Ionicons } from "@expo/vector-icons";
+
+const { width } = Dimensions.get("window");
+const CIRCLE_SIZE = width * 0.75;
+const STROKE_WIDTH = 15;
+const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export default function PomodoroScreen({ navigation }) {
   const WORK_TIME = 25 * 60;
@@ -9,7 +17,7 @@ export default function PomodoroScreen({ navigation }) {
 
   const [secondsLeft, setSecondsLeft] = useState(WORK_TIME);
   const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState("work");
+  const [mode, setMode] = useState("work"); 
   const [sessions, setSessions] = useState(0);
 
   const intervalRef = useRef(null);
@@ -18,11 +26,18 @@ export default function PomodoroScreen({ navigation }) {
     return () => clearInterval(intervalRef.current);
   }, []);
 
+  const getTotalTime = () => {
+    switch (mode) {
+      case "work": return WORK_TIME;
+      case "short": return SHORT_BREAK;
+      case "long": return LONG_BREAK;
+      default: return WORK_TIME;
+    }
+  };
+
   const startTimer = () => {
     if (intervalRef.current) return;
-
     setIsRunning(true);
-
     intervalRef.current = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -44,17 +59,15 @@ export default function PomodoroScreen({ navigation }) {
 
   const resetTimer = () => {
     pauseTimer();
-    if (mode === "work") setSecondsLeft(WORK_TIME);
-    if (mode === "short") setSecondsLeft(SHORT_BREAK);
-    if (mode === "long") setSecondsLeft(LONG_BREAK);
+    const total = getTotalTime();
+    setSecondsLeft(total);
   };
 
   const handleTimerEnd = () => {
     if (mode === "work") {
-      Alert.alert("Focus Session Complete", "Great job! You've completed a session.");
+      Alert.alert("Focus Session Complete", "Great job! Take a break.");
       const newSessions = sessions + 1;
       setSessions(newSessions);
-
       if (newSessions % 4 === 0) {
         setMode("long");
         setSecondsLeft(LONG_BREAK);
@@ -63,10 +76,10 @@ export default function PomodoroScreen({ navigation }) {
         setSecondsLeft(SHORT_BREAK);
       }
     } else {
+      Alert.alert("Break Over", "Time to focus again!");
       setMode("work");
       setSecondsLeft(WORK_TIME);
     }
-
     setIsRunning(false);
   };
 
@@ -76,50 +89,95 @@ export default function PomodoroScreen({ navigation }) {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  // Calculate Progress
+  const totalTime = getTotalTime();
+  const progress = 1 - secondsLeft / totalTime;
+  const strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+
+  const getColors = () => {
+    if (mode === "work") return ["#6a11cb", "#2575fc"]; 
+    if (mode === "short") return ["#43e97b", "#38f9d7"]; 
+    return ["#ff9a9e", "#fecfef"]; 
+  };
+  const [gradStart, gradEnd] = getColors();
+
   return (
     <View style={styles.container}>
+      <LinearGradient
+        colors={["#0f172a", "#1e293b"]}
+        style={StyleSheet.absoluteFillObject}
+      />
 
-      {/* Back */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
-
-      {/* Mode */}
-      <Text style={styles.modeText}>
-        {mode === "work"
-          ? "Focus Session"
-          : mode === "short"
-            ? "Short Break"
-            : "Long Break"}
-      </Text>
-
-      {/* Time */}
-      <Text style={styles.timer}>{formatTime(secondsLeft)}</Text>
-
-      {/* Start / Pause / Reset */}
-      <View style={styles.buttonsRow}>
-        {!isRunning ? (
-          <TouchableOpacity style={styles.button} onPress={startTimer}>
-            <Text style={styles.buttonText}>Start</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.button} onPress={pauseTimer}>
-            <Text style={styles.buttonText}>Pause</Text>
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity style={styles.button} onPress={resetTimer}>
-          <Text style={styles.buttonText}>Reset</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={28} color="white" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Pomodoro</Text>
+        <View style={{ width: 28 }} />
       </View>
 
-      <Text style={styles.sessions}>
-        Completed Focus Sessions: {sessions}
-      </Text>
+      {/* Main Content */}
+      <View style={styles.content}>
 
+        {/* Status Chip */}
+        <View style={[styles.statusChip, { borderColor: gradEnd }]}>
+          <Text style={[styles.statusText, { color: gradEnd }]}>
+            {mode === 'work' ? 'FOCUS' : mode === 'short' ? 'SHORT BREAK' : 'LONG BREAK'}
+          </Text>
+        </View>
+
+        {/* Circular Timer */}
+        <View style={styles.timerContainer}>
+          <Svg width={CIRCLE_SIZE} height={CIRCLE_SIZE}>
+            {/* Track Circle */}
+            <Circle
+              stroke="rgba(255,255,255,0.1)"
+              cx={CIRCLE_SIZE / 2}
+              cy={CIRCLE_SIZE / 2}
+              r={RADIUS}
+              strokeWidth={STROKE_WIDTH}
+            />
+            {/* Progress Circle */}
+            <Circle
+              stroke={gradEnd}
+              cx={CIRCLE_SIZE / 2}
+              cy={CIRCLE_SIZE / 2}
+              r={RADIUS}
+              strokeWidth={STROKE_WIDTH}
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={CIRCUMFERENCE * (1 - (secondsLeft / totalTime))}
+              strokeLinecap="round"
+              rotation="-90"
+              origin={`${CIRCLE_SIZE / 2}, ${CIRCLE_SIZE / 2}`}
+            />
+          </Svg>
+          <View style={styles.timertextContainer}>
+            <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
+          </View>
+        </View>
+
+        {/* Controls */}
+        <View style={styles.controls}>
+          {/* Toggle Start/Pause */}
+          <TouchableOpacity
+            style={[styles.mainButton, { backgroundColor: gradEnd }]}
+            onPress={isRunning ? pauseTimer : startTimer}
+          >
+            <Ionicons name={isRunning ? "pause" : "play"} size={32} color={mode === 'short' || mode === 'long' ? '#000' : '#FFF'} />
+          </TouchableOpacity>
+
+          {/* Reset - smaller */}
+          <TouchableOpacity style={styles.resetButton} onPress={resetTimer}>
+            <Ionicons name="refresh" size={24} color="rgba(255,255,255,0.6)" />
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.sessionText}>
+          Sessions Completed: <Text style={{ color: gradEnd, fontWeight: 'bold' }}>{sessions}</Text>
+        </Text>
+
+      </View>
     </View>
   );
 }
@@ -127,51 +185,94 @@ export default function PomodoroScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0B0F19",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    backgroundColor: "#0B0F19", // Fallback
   },
-  backButton: {
-    position: "absolute",
-    top: 60,
-    left: 20,
-  },
-  backText: {
-    color: "#5DE0FF",
-    fontSize: 18,
-  },
-  modeText: {
-    fontSize: 26,
-    color: "#C7D6FF",
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 60,
+    paddingHorizontal: 20,
     marginBottom: 20,
   },
-  timer: {
-    fontSize: 72,
-    color: "white",
-    fontWeight: "bold",
-    marginVertical: 20,
+  backButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
   },
-  buttonsRow: {
-    flexDirection: "row",
-    marginTop: 20,
-    gap: 20,
+  headerTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
   },
-  button: {
-    backgroundColor: "#5DE0FF",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 20,
+  content: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 80,
   },
-  buttonText: {
-    color: "#001B22",
-    fontWeight: "800",
-    fontSize: 17,
+  statusChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    borderWidth: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    marginBottom: 40,
   },
-  sessions: {
-    marginTop: 25,
-    color: "#7BE495",
-    fontSize: 18,
+  statusText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 1.5,
   },
+  timerContainer: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  timertextContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 64,
+    color: 'white',
+    fontWeight: '200', // Thin font for premium look
+    fontVariant: ['tabular-nums'],
+  },
+  controls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 30,
+  },
+  mainButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  resetButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sessionText: {
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 40,
+    fontSize: 16,
+  }
 });
-
